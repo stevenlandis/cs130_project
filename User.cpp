@@ -1,4 +1,4 @@
-#include "User.h"
+#include "FriendNet.h"
 
 using namespace std;
 
