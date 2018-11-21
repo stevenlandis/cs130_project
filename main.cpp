@@ -10,7 +10,11 @@ int main() {
 	FriendNet friendNet;
 
 	vector<int> friends = {1,2,3,4,5};
-	friendNet.addUser(1001, "John", "stuff", "things", friends);
+	friendNet.addUser(1003, "John", "stuff", "things", friends);
 	friendNet.addUser(1002, "John", "stuff", "things", friends);
-	// friendNet.addUser(1003, "John", "stuff", "things", friends);
+	friendNet.addUser(1001, "John", "stuff", "things", friends);
+
+	friendNet.print();
+
+    friendNet.addUser(1000, "John", "stuff", "things", friends);
 }

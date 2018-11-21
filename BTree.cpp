@@ -1,5 +1,6 @@
 #include "BTree.h"
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -16,11 +17,62 @@ using namespace std;
 // ---------
 //  Pointer
 // ---------
-BTreeNodePtr::~BTreeNodePtr() {
+void BTreeNodePtr::del() {
 	switch(type) {
 		case NONE: return;
-		case PATH: delete path; return;
-		case DATA: delete data; return;
+		case PATH:  {
+			if (path) {
+				delete path;
+				path = nullptr;
+			}
+			return;
+		}
+		case DATA: {
+			if (data) {
+				delete data;
+				data = nullptr;
+			}
+			return;
+		}
+	}
+}
+
+void BTreeNodePtr::makeNewData() {
+	assert(type == NONE);
+	type = DATA;
+	data = new BTreeDataNode();
+}
+
+void BTreeNodePtr::makeNewPath() {
+	assert(type == NONE);
+	type = PATH;
+	path = new BTreePathNode();
+}
+
+int BTreeNodePtr::getMin() {
+	assert(type != NONE);
+
+	if (type == DATA) {
+		return data->getMin();
+	} else {
+		return path->getMin();
+	}
+}
+
+void BTreeNodePtr::print() {
+	switch(type) {
+		case NONE: {
+			cout << "none";
+			break;
+		}
+		case PATH: {
+			path->print();
+			break;
+		}
+		case DATA: {
+			data->print();
+			break;
+		}
 	}
 }
 
@@ -28,17 +80,12 @@ BTreeNodePtr::~BTreeNodePtr() {
 //  Data
 // ------
 BTreeDataNode::~BTreeDataNode() {
-	for (int i = 0; i < stored; i++)
+	for (int i = 0; i < stored; i++) {
 		delete users[i];
+	}
 }	
 
 void BTreeDataNode::insert(User* user) {
-	// make sure there is room
-	if (stored+1 > BT_L) {
-		cout << "Error: inserting user to full list\n";
-		return;
-	}
-
 	// loop through data until higher index found
 	int i = findUserI(user);
 	// i now stores the index of where the new user should go
@@ -47,6 +94,9 @@ void BTreeDataNode::insert(User* user) {
 }
 
 void BTreeDataNode::insert(User* user, int i) {
+	// make sure there is room
+	assert(stored < BT_L);
+
 	// shift over users to make room
 	shiftUser(i);
 
@@ -70,19 +120,18 @@ int BTreeDataNode::findUserI(User* user) {
 	return i;
 }
 
-int BTreeDataNode::shiftUser(int i) {
+void BTreeDataNode::shiftUser(int i) {
 	for (int j = stored-1; j >= i; j--) {
-		cout << j << endl;
 		users[j+1] = users[j];
 	}
 }
 
-BTreeDataNode BTreeDataNode::split(User* user) {
+BTreeDataNode* BTreeDataNode::split(User* user) {
 	if (stored != BT_L) {
 		cout << "Error: splitting a data node that is not full\n";
 	}
 
-	BTreeDataNode newData;
+	BTreeDataNode* newData = new BTreeDataNode();
 
 	// find where to insert the new node (can be <= BT_L)
 	int i = findUserI(user);
@@ -92,9 +141,9 @@ BTreeDataNode BTreeDataNode::split(User* user) {
 
 		// move half of users to new node
 		stored = BT_L/2;
-		newData.stored = (BT_L+1)/2;
-		for (int j = 0; j < newData.stored; j++) {
-			newData.users[j] = users[j+stored];
+		newData->stored = (BT_L+1)/2;
+		for (int j = 0; j < newData->stored; j++) {
+			newData->users[j] = users[j+stored];
 		}
 
 		// insert new user into lower half
@@ -104,13 +153,14 @@ BTreeDataNode BTreeDataNode::split(User* user) {
 
 		// move half of users to new node
 		stored = (BT_L+1)/2;
-		newData.stored = BT_L/2;
-		for (int j = 0; j < newData.stored; j++) {
-			newData.users[j] = users[j+stored];
+		newData->stored = BT_L/2;
+
+		for (int j = 0; j < newData->stored; j++) {
+			newData->users[j] = users[j+stored];
 		}
 
 		// insert new user into upper half
-		insert(user, i-stored);
+		newData->insert(user, i-stored);
 	}
 
 	return newData;
@@ -124,61 +174,128 @@ void BTreeDataNode::print() {
 			cout << ", " << users[i]->perm_number;
 		}
 	}
-	cout << "}\n";
+	cout << "}";
+}
+
+int BTreeDataNode::getMin() {
+	return users[0]->perm_number;
 }
 
 // ------
 //  Path
 // ------
+int BTreePathNode::getNodeI(BTreeNodePtr node) {
+	int i = stored;
+	for (; i > 0; i--) {
+		if (node.getMin() < permKeys[i-1]) break;
+	}
 
+	if (i == 0 && stored > 0 && node.getMin() > children[0].getMin()) {
+		i = 1;
+	}
+
+	return i;
+}
+
+int BTreePathNode::getUserI(User* user) {
+	int i = 0;
+	for (; i < stored-1; i++) {
+		if (permKeys[i] > user->perm_number) {
+			break;
+		}
+	}
+
+	return i;
+}
+
+void BTreePathNode::shiftNode(int i) {
+	for (int j = stored-1; j >= i; j--) {
+		children[j+1] = children[j];
+
+		if (j > 0) {
+			permKeys[j] = permKeys[j-1];
+		}
+
+		if (j == 0) {
+			permKeys[0] = children[0].getMin();
+		}
+	}
+}
+
+void BTreePathNode::insert(BTreeNodePtr node) {
+	int i = getNodeI(node);
+
+	insert(node, i);
+}
+
+void BTreePathNode::insert(BTreeNodePtr node, int i) {
+	assert(stored < BT_M);
+
+	shiftNode(i);
+
+	children[i] = node;
+
+	// set the key
+	if (i > 0) {
+		permKeys[i-1] = node.getMin();
+	}
+
+	stored++;
+
+	// print();
+}
+
+int BTreePathNode::getMin() {
+	return children[0].getMin();
+}
+
+void BTreePathNode::print() {
+	cout << "path(" << stored << "){";
+	if (stored > 0) {
+		children[0].print();
+		for (int i = 1; i < stored; i++) {
+			cout << " |" << permKeys[i-1] << "| "; children[i].print();
+		}
+	}
+	cout << "}\n";
+}
 
 // ------
 //  Tree
 // ------
 void BTree::insert(User* user) {
 	if (root.type == NONE) {
-		// empty root
-		root.type = DATA;
-		root.data = new BTreeDataNode();
-		root.data->parent = NULL;
+		root.makeNewData();
 		root.data->insert(user);
-		root.data->print();
-		return;
-	} else if (root.type == DATA) {
+	}
+	else if (root.type == DATA) {
 		if (root.data->canInsert()) {
 			root.data->insert(user);
-			return;
-		} else {
-			// need to split root
-			newData = split(user);
-
-			// insert the new node into parent
-			insert(root->parent, )
-		}
-	}
-}
-
-void BTree::insert(BTreeNodePtr node, User* user) {
-	if (node.type == NONE) {
-		// empty node
-		node.type = DATA;
-		node.data = new BTreeDataNode();
-		node.data->parent = NULL;
-		node.data->insert(user);
-		node.data->print();
-		return;
-	} else if (node.type == DATA) {
-		if (node.data->canInsert()) {
-			node.data->insert(user);
-			return;
 		} else {
 			// need to split node
-			newData = split(user);
+			BTreeDataNode* newData = root.data->split(user);
 
-			// insert the new node into parent
-			insert(node->parent, )
+			BTreeNodePtr newPtr(newData);
+
+			BTreeNodePtr tempRoot;
+			tempRoot.makeNewPath();
+
+			// cout << "inserting root\n";
+			tempRoot.path->insert(root);
+			// cout << "inserting newPtr\n";
+			tempRoot.path->insert(newPtr);
+
+			// set the new root
+			root = tempRoot;
 		}
+	}
+	else if (root.type == PATH) {
+		// progress down the tree and recursively call insert
+		int i = root.path->getUserI(user);
+		cout << i << endl;
 	}
 }
 
-void BTree::insert(BT)
+void BTree::print() {
+	root.print();
+}

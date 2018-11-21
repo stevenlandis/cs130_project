@@ -19,6 +19,8 @@ public:
 		std::string genre2,
 		std::vector<int> friends
 	);
+
+	void print() {tree.print();}
 };
 
 #endif

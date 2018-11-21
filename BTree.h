@@ -20,18 +20,44 @@ struct BTreeNodePtr {
 	};
 
 
-	BTreeNodePtr(): type(NONE), path(NULL) {}
+	BTreeNodePtr(): type(NONE) {}
+	BTreeNodePtr(BTreePathNode* node) {
+		type = PATH;
+		path = node;
+	}
+	BTreeNodePtr(BTreeDataNode* node) {
+		type = DATA;
+		data = node;
+	}
 
-	~BTreeNodePtr();
+	void makeNewData();
+	void makeNewPath();
+
+	int getMin();
+
+	void print();
+
+	void del();
 };
 
 struct BTreePathNode {
 	BTreePathNode* parent;
-	int n_children;
+	int stored;
 	int permKeys[BT_M-1];
 	BTreeNodePtr children[BT_M];
 
-	BTreePathNode(): n_children(0) {}
+	BTreePathNode(): stored(0) {}
+
+	void insert(BTreeNodePtr node);
+	void insert(BTreePathNode* node);
+	void insert(BTreeNodePtr node, int i);
+	int getNodeI(BTreeNodePtr node);
+	int getUserI(User* user);
+	void shiftNode(int i);
+
+	int getMin();
+
+	void print();
 };
 
 struct BTreeDataNode {
@@ -45,18 +71,18 @@ struct BTreeDataNode {
 	void insert(User* user, int i);
 	void print();
 	bool canInsert() {return stored < BT_L;}
-	BTreeDataNode split(User* user);
+	BTreeDataNode* split(User* user);
 	int findUserI(User* user);
-	int shiftUser(int i);
+	void shiftUser(int i);
+
+	int getMin();
 };
 
 struct UserNode {
 	AL_Head* AList;
 	User user;
 
-	~UserNode() {
-		delete AList;
-	}
+	UserNode(User& user): AList(nullptr), user(user) {}
 };
 
 class BTree {
@@ -64,6 +90,10 @@ public:
 	BTreeNodePtr root;
 
 	void insert(User* user);
+	void insert(BTreeNodePtr node, User* user);
+	void insert(BTreeNodePtr node, BTreeDataNode data);
+
+	void print();
 };
 
 #endif
