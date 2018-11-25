@@ -1,5 +1,22 @@
 #include "FriendNet.h"
 
+void FriendNet::readInputFile(std::string file){
+
+}
+  
+void FriendNet::findUser(int perm){
+
+}
+
+void FriendNet::findUserDetails(int perm){
+
+}
+
+void FriendNet::recommendFriends(int perm){
+
+}
+  
+
 void FriendNet::addUser(
 		int perm_number,
 		std::string name,
