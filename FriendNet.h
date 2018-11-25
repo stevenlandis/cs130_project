@@ -12,7 +12,7 @@ class FriendNet {
   Graph graph;
   BTree tree;
 
-  void readInputFile(std::string file);
+  void readInputFile(std::string filepath);
   
   void addUser(
 	       int perm_number,
