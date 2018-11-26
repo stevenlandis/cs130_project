@@ -3,6 +3,7 @@
 
 #include <vector>
 
+
 struct AL_Head;
 struct AL_Node;
 
@@ -23,6 +24,10 @@ struct AL_Node {
 class Graph {
 public:
 	std::vector<AL_Head> ALists;
+
+	AL_Head* addUser(int perm, std::vector<int> friends);
+	void addFriendToUser(AL_Head* user, int friendPerm);
+	bool isFriend(AL_Head* user, int friendPerm);
 };
 
 #endif
