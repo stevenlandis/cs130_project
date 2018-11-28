@@ -1,9 +1,21 @@
-all: exec
-	./exec
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall -g
 
-exec: main.cpp FriendNet.h FriendNet.cpp BTree.cpp BTree.h User.cpp User.h Graph.cpp Graph.h
-	g++ -g -std=c++11 -o exec main.cpp FriendNet.cpp BTree.cpp User.cpp Graph.cpp
+HEADERS = FriendNet.h BTree.h User.h Graph.h
+CPPFILES = FriendNet.cpp BTree.cpp User.cpp Graph.cpp
+
+test: testExec
+	./testExec
+
+main: mainExec
+	./mainExec
+
+mainExec: $(HEADERS) $(CPPFILES) main.cpp
+	g++ -g -std=c++11 -o mainExec main.cpp $(CPPFILES)
+
+testExec: $(HEADERS) $(CPPFILES) test.cpp
+	g++ -g -std=c++11 -o testExec test.cpp $(CPPFILES)
 
 clean:
-	rm -f exec
-	rm -rf exev.dSYM
+	rm -f mainExec testExec
+	rm -rf mainExec.dSYM
