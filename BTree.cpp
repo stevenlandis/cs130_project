@@ -292,7 +292,7 @@ void BTree::insert(User* user) {
 	else if (root.type == PATH) {
 		// progress down the tree and recursively call insert
 		int i = root.path->getUserI(user);
-		cout << i << endl;
+		// cout << i << endl;
 	}
 }
 
