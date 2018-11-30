@@ -1,98 +1,79 @@
 #ifndef BTREE_H
 #define BTREE_H
 
-#include <vector>
+// #include <vector>
 #include "User.h"
 #include "Graph.h"
 
-const int BT_M = 4;
-const int BT_L = 2;
-
-struct BTreePathNode;
-struct BTreeDataNode;
-struct BTreeNodePtr;
-
-struct BTreeNodePtr {
-	enum {NONE, PATH, DATA} type;
-	union {
-		BTreePathNode* path;
-		BTreeDataNode* data;
-	};
-
-
-	BTreeNodePtr(): type(NONE) {}
-	BTreeNodePtr(BTreePathNode* node) {
-		type = PATH;
-		path = node;
-	}
-	BTreeNodePtr(BTreeDataNode* node) {
-		type = DATA;
-		data = node;
-	}
-
-	void makeNewData();
-	void makeNewPath();
-
-	int getMin();
-
-	void print();
-
-	void del();
-};
-
-struct BTreePathNode {
-	BTreePathNode* parent;
-	int stored;
-	int permKeys[BT_M-1];
-	BTreeNodePtr children[BT_M];
-
-	BTreePathNode(): stored(0) {}
-
-	void insert(BTreeNodePtr node);
-	void insert(BTreePathNode* node);
-	void insert(BTreeNodePtr node, int i);
-	int getNodeI(BTreeNodePtr node);
-	int getUserI(User* user);
-	void shiftNode(int i);
-
-	int getMin();
-
-	void print();
-};
-
-struct BTreeDataNode {
-	BTreePathNode* parent;
-	int stored;
-	User* users[BT_L];
-
-	BTreeDataNode(): stored(0), parent(NULL) {}
-	~BTreeDataNode();
-	void insert(User* user);
-	void insert(User* user, int i);
-	void print();
-	bool canInsert() {return stored < BT_L;}
-	BTreeDataNode* split(User* user);
-	int findUserI(User* user);
-	void shiftUser(int i);
-
-	int getMin();
-};
-
-struct UserNode {
-	AL_Head* AList;
-	User user;
-
-	UserNode(User& user): AList(nullptr), user(user) {}
-};
-
 class BTree {
 public:
-	BTreeNodePtr root;
+	static const int M = 4;
+	static const int L = 2;
+
+// private:
+	struct Path;
+	struct Data;
+	struct Ptr;
+
+	struct Ptr {
+		enum {NONE, PATH, DATA} type;
+		union {
+			Path* path;
+			Data* data;
+		};
+
+		Ptr();
+		Ptr(Path* node);
+		Ptr(Data* node);
+
+		Ptr insert(User* user);
+
+		int getMin();
+		void print(int tabH);
+		void del();
+	};
+
+	struct Path {
+		int stored;
+		int keys[M-1];
+		Ptr children[M];
+
+		Path();
+		~Path();
+
+		int getFindI(int perm);
+		int getInsertI(int perm);
+		Ptr insert(User* user);
+		Ptr insert(Ptr node);
+		Ptr baseInsert(Ptr node, int i);
+		Ptr splitInsert(Ptr node, int i);
+		void shiftChildren(int i);
+
+		int getMin();
+		void print(int tabH);
+	};
+
+	struct Data {
+		int stored;
+		User* users[L];
+
+		Data();
+		~Data();
+
+		int getUserI(User* user);
+		Ptr insert(User* user);
+		Ptr baseInsert(User* user, int i);
+		Ptr splitInsert(User* user, int i);
+		void shiftUsers(int i);
+
+		int getMin();
+		void print(int tabH);
+	};
+
+// public:
+	Ptr root;
 
 	void insert(User* user);
-	void insert(BTreeNodePtr node, User* user);
-	void insert(BTreeNodePtr node, BTreeDataNode data);
-
 	void print();
 };
 

@@ -1,0 +1,45 @@
+To insert a node into a B tree, there are two stages
+1. Down stage
+    This is where the algorithm progresses down the tree searching to where to insert the node.
+    Implemented recursively
+
+2. Up stage
+    After finding where to put the new node, the new user is inserted and any new split nodes are handled up the tree.
+
+Prt::insert(user) {
+    assert(type != NONE);
+
+    if type is PATH {
+        Ptr splitNode = path->insert(user)
+        if splitNode.type is NONE return Ptr(null)
+        return path->insert(splitNode)
+    } else {
+        // type is DATA
+        return data->insert(user)
+    }
+}
+
+path::insert(Ptr node) {
+    // loop through keys and find place where node should go
+    int i = getNodeI(node);
+
+    if (stored == L) {
+        return splitInsert(node, i);
+    } else {
+        baseInsert(node, i);
+        return Ptr(null);
+    }
+}
+
+path::baseInsert(node, i) {
+    shiftChildren(i);
+    children[i] = node;
+}
+
+path::splitInsert(Ptr node, int i) {
+    path* newPath = new Path();
+
+    // messy split code
+
+    return Ptr(newPath);
+}

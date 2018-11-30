@@ -28,7 +28,7 @@ class FriendNet {
 
   void recommendFriends(int perm);
   
-  void print() {tree.print();}
+  void print();
 };
 
 #endif
