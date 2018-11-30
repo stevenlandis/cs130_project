@@ -8,6 +8,7 @@ using namespace std;
 typedef BTree::Ptr Ptr;
 typedef BTree::Path Path;
 typedef BTree::Data Data;
+typedef BTree::UserNode UserNode;
 
 // ------------------
 //  Helper functions
@@ -22,7 +23,7 @@ Ptr::Ptr(): type(NONE) {}
 Ptr::Ptr(Path* node): type(PATH), path(node) {}
 Ptr::Ptr(Data* node): type(DATA), data(node) {}
 
-Ptr Ptr::insert(User* user) {
+Ptr Ptr::insert(UserNode user) {
 	assert(type != NONE);
 
 	if (type == PATH) {
@@ -36,6 +37,16 @@ Ptr Ptr::insert(User* user) {
 
 	// type is DATA
 	return data->insert(user);
+}
+
+AL_Head* Ptr::getList(int perm) {
+	assert(type != NONE);
+
+	if (type == PATH) {
+		return path->getList(perm);
+	}
+
+	return data->getList(perm);
 }
 
 int Ptr::getMin() {
@@ -101,9 +112,9 @@ int Path::getInsertI(int minPerm) {
 	return i;
 }
 
-Ptr Path::insert(User* user) {
+Ptr Path::insert(UserNode user) {
 	// cout << "inserting " << user->perm_number << endl;
-	int i = getFindI(user->perm_number);
+	int i = getFindI(user.user->perm_number);
 
 	return children[i].insert(user);
 }
@@ -187,6 +198,12 @@ void Path::shiftChildren(int i) {
 	}
 }
 
+AL_Head* Path::getList(int perm) {
+	int i = getFindI(perm);
+
+	return children[i].getList(perm);
+}
+
 int Path::getMin() {
 	return children[0].getMin();
 }
@@ -224,23 +241,23 @@ Data::Data(): stored(0) {}
 
 Data::~Data() {
 	for (int i = 0; i < stored; i++) {
-		delete users[i];
+		users[i].del();
 	}
 }
 
-int Data::getUserI(User* user) {
+int Data::getUserI(UserNode user) {
 	int i = 0;
 	for (; i < stored; i++) {
-		assert(users[i]->perm_number != user->perm_number);
+		assert(users[i].user->perm_number != user.user->perm_number);
 
-		if (users[i]->perm_number > user->perm_number) {
+		if (users[i].user->perm_number > user.user->perm_number) {
 			break;
 		}
 	}
 	return i;
 }
 
-Ptr Data::insert(User* user) {
+Ptr Data::insert(UserNode user) {
 	int i = getUserI(user);
 
 	if (stored == L) {
@@ -250,14 +267,14 @@ Ptr Data::insert(User* user) {
 	}
 }
 
-Ptr Data::baseInsert(User* user, int i) {
+Ptr Data::baseInsert(UserNode user, int i) {
 	shiftUsers(i);
 	users[i] = user;
 	stored++;
 	return Ptr();
 }
 
-Ptr Data::splitInsert(User* user, int i) {
+Ptr Data::splitInsert(UserNode user, int i) {
 	assert(stored == L);
 
 	// create upper half
@@ -299,19 +316,45 @@ void Data::shiftUsers(int i) {
 }
 
 int Data::getMin() {
-	return users[0]->perm_number;
+	return users[0].user->perm_number;
+}
+
+AL_Head* Data::getList(int perm) {
+	for (int i = 0; i < stored; i++) {
+		if (users[i].user->perm_number == perm) {
+			return users[i].list;
+		}
+	}
+
+	// by this point, the list wasn't found
+	return nullptr;
 }
 
 void Data::print(int tabH) {
 	cout << "DATA(" << stored <<  ") {";
 	// cout << "DATA(" << stored << ", " << getMin() << "){";
 	if (stored > 0) {
-		cout << users[0]->perm_number;
+		cout << users[0].user->perm_number;
+		cout << ": "<< users[0].list;
 		for (int i = 1; i < stored; i++) {
-			cout << ", " << users[i]->perm_number;
+			cout << ", " << users[i].user->perm_number;
+			cout << ": "<< users[i].list;
 		}
 	}
 	cout << "}";
+}
+
+// -----------
+//  User Node
+// -----------
+UserNode::UserNode() {}
+
+UserNode::UserNode(User* user, AL_Head* list)
+: list(list), user(user) {}
+
+void UserNode::del() {
+	delete user;
+	// don't delete the list because Graph manages that memory;
 }
 
 // ------
@@ -321,7 +364,9 @@ BTree::~BTree() {
 	root.del();
 }
 
-void BTree::insert(User* user) {
+void BTree::insert(User* user, AL_Head* list) {
+	UserNode userNode(user, list);
+
 	switch (root.type) {
 		case Ptr::NONE: {
 			// turn root into data node
@@ -329,11 +374,11 @@ void BTree::insert(User* user) {
 			root.data = new Data();
 
 			// first insert is guarenteeded so do nothing with return value
-			root.data->insert(user);
+			root.data->insert(userNode);
 			break;
 		}
 		case Ptr::DATA: {
-			Ptr splitNode = root.data->insert(user);
+			Ptr splitNode = root.data->insert(userNode);
 
 			if (splitNode.type == Ptr::DATA) {
 				// convert root into path
@@ -346,7 +391,7 @@ void BTree::insert(User* user) {
 			break;
 		}
 		case Ptr::PATH: {
-			Ptr splitNode = root.insert(user);
+			Ptr splitNode = root.insert(userNode);
 
 			if (splitNode.type == Ptr::PATH) {
 				// update root to store root and splitNode
@@ -359,6 +404,10 @@ void BTree::insert(User* user) {
 			break;
 		}
 	}
+}
+
+AL_Head* BTree::getList(int perm) {
+	return root.getList(perm);
 }
 
 void BTree::print() {

@@ -38,6 +38,8 @@ int main() {
   friendNet.addUser(4, "John", "stuff", "things", friends);
 
   friendNet.print();
+
+  cout << friendNet.tree.getList(666) << endl;
   
   // friendNet.addUser(0, "John", "stuff", "things", friends);
   

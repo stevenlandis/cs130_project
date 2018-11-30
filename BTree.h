@@ -12,6 +12,17 @@ struct BTree {
 	struct Path;
 	struct Data;
 	struct Ptr;
+	struct UserNode;
+
+	struct UserNode {
+		AL_Head* list;
+		User* user;
+
+		UserNode();
+		UserNode(User* user, AL_Head* list);
+		
+		void del();
+	};
 
 	struct Ptr {
 		enum {NONE, PATH, DATA} type;
@@ -24,7 +35,8 @@ struct BTree {
 		Ptr(Path* node);
 		Ptr(Data* node);
 
-		Ptr insert(User* user);
+		Ptr insert(UserNode user);
+		AL_Head* getList(int perm);
 
 		int getMin();
 		void print(int tabH);
@@ -41,11 +53,13 @@ struct BTree {
 
 		int getFindI(int perm);
 		int getInsertI(int perm);
-		Ptr insert(User* user);
+		Ptr insert(UserNode user);
 		Ptr insert(Ptr node);
 		Ptr baseInsert(Ptr node, int i);
 		Ptr splitInsert(Ptr node, int i);
 		void shiftChildren(int i);
+
+		AL_Head* getList(int perm);
 
 		int getMin();
 		void print(int tabH);
@@ -53,16 +67,18 @@ struct BTree {
 
 	struct Data {
 		int stored;
-		User* users[L];
+		BTree::UserNode users[L];
 
 		Data();
 		~Data();
 
-		int getUserI(User* user);
-		Ptr insert(User* user);
-		Ptr baseInsert(User* user, int i);
-		Ptr splitInsert(User* user, int i);
+		int getUserI(UserNode user);
+		Ptr insert(UserNode user);
+		Ptr baseInsert(UserNode user, int i);
+		Ptr splitInsert(UserNode user, int i);
 		void shiftUsers(int i);
+
+		AL_Head* getList(int perm);
 
 		int getMin();
 		void print(int tabH);
@@ -72,7 +88,9 @@ struct BTree {
 
 	~BTree();
 
-	void insert(User* user);
+	void insert(User* user, AL_Head* list);
+	AL_Head* getList(int perm);
+
 	void print();
 };
 

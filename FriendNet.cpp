@@ -72,8 +72,12 @@ void FriendNet::addUser(
             ) {
     // make a new user
     User* newUser = new User(perm_number, name, genre1, genre2);
+
+    // add the user to the friend net
+    AL_Head* newHead = graph.addUser(perm_number, friends);
     
-    tree.insert(newUser);
+    // tree owns and deletes newUser
+    tree.insert(newUser, newHead);
 }
 
 void FriendNet::print() {
