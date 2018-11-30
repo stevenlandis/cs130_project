@@ -7,6 +7,9 @@ CPPFILES = FriendNet.cpp BTree.cpp User.cpp Graph.cpp
 test: testExec
 	./testExec
 
+testLeaks: testExec
+	valgrind --leak-check=yes ./testExec
+
 main: mainExec
 	./mainExec
 

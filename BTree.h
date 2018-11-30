@@ -5,12 +5,10 @@
 #include "User.h"
 #include "Graph.h"
 
-class BTree {
-public:
+struct BTree {
 	static const int M = 4;
 	static const int L = 2;
 
-// private:
 	struct Path;
 	struct Data;
 	struct Ptr;
@@ -70,8 +68,9 @@ public:
 		void print(int tabH);
 	};
 
-// public:
 	Ptr root;
+
+	~BTree();
 
 	void insert(User* user);
 	void print();

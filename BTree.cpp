@@ -317,6 +317,10 @@ void Data::print(int tabH) {
 // ------
 //  Tree
 // ------
+BTree::~BTree() {
+	root.del();
+}
+
 void BTree::insert(User* user) {
 	switch (root.type) {
 		case Ptr::NONE: {
