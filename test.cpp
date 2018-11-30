@@ -39,7 +39,7 @@ int main() {
 
   friendNet.print();
 
-  cout << friendNet.tree.getList(666) << endl;
+  cout << "Search for list 13 --> " << friendNet.tree.getList(13) << endl;
   
   // friendNet.addUser(0, "John", "stuff", "things", friends);
   
