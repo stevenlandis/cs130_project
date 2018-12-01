@@ -1,7 +1,14 @@
 #include "Graph.h"
 
+#include <iostream>
+
 AL_Head::~AL_Head() {
-	if (head != NULL) delete head;
+  std::cout << "Destructor\n";
+  if (head != NULL){
+    std::cout << "Head not null\n";
+    delete head;
+  }
+  std::cout << "Destructor finished \n";
 }
 
 AL_Node::~AL_Node() {
@@ -69,4 +76,15 @@ bool Graph::isFriend(AL_Head* user, int friendPerm){
     friendNode = friendNode->next;
   }
   return false;
+}
+
+
+std::vector<int> Graph::listFriends(AL_Head* user){
+  AL_Node* friendNode = user->head;
+  std::vector<int> list;
+  while(friendNode != NULL){
+    list.push_back(friendNode->perm);
+    friendNode = friendNode->next;
+  }
+  return list;
 }

@@ -14,6 +14,16 @@ typedef BTree::UserNode UserNode;
 //  Helper functions
 // ------------------
 
+UserNode::UserNode(){
+  user = NULL;
+  list = NULL;
+}
+
+UserNode::UserNode(User* user, AL_Head* list){
+  this->user = user;
+  this->list = list;
+}
+
 
 // ---------
 //  Pointer
@@ -39,14 +49,14 @@ Ptr Ptr::insert(UserNode user) {
 	return data->insert(user);
 }
 
-AL_Head* Ptr::getList(int perm) {
+UserNode Ptr::getUser(int perm) {
 	assert(type != NONE);
 
 	if (type == PATH) {
-		return path->getList(perm);
+		return path->getUser(perm);
 	}
 
-	return data->getList(perm);
+	return data->getUser(perm);
 }
 
 int Ptr::getMin() {
@@ -77,11 +87,10 @@ void Ptr::print(int tabH) {
 }
 
 void Ptr::del() {
-	assert(type != NONE);
 
 	if (type == PATH) {
 		delete path;
-	} else {
+	} else if(type == DATA){
 		delete data;
 	}
 }
@@ -198,10 +207,10 @@ void Path::shiftChildren(int i) {
 	}
 }
 
-AL_Head* Path::getList(int perm) {
+UserNode Path::getUser(int perm) {
 	int i = getFindI(perm);
 
-	return children[i].getList(perm);
+	return children[i].getUser(perm);
 }
 
 int Path::getMin() {
@@ -319,15 +328,15 @@ int Data::getMin() {
 	return users[0].user->perm_number;
 }
 
-AL_Head* Data::getList(int perm) {
+UserNode Data::getUser(int perm) {
 	for (int i = 0; i < stored; i++) {
 		if (users[i].user->perm_number == perm) {
-			return users[i].list;
+			return users[i];
 		}
 	}
 
 	// by this point, the list wasn't found
-	return nullptr;
+	return UserNode();
 }
 
 void Data::print(int tabH) {
@@ -347,10 +356,6 @@ void Data::print(int tabH) {
 // -----------
 //  User Node
 // -----------
-UserNode::UserNode() {}
-
-UserNode::UserNode(User* user, AL_Head* list)
-: list(list), user(user) {}
 
 void UserNode::del() {
 	delete user;
@@ -404,10 +409,21 @@ void BTree::insert(User* user, AL_Head* list) {
 			break;
 		}
 	}
+	
+}
+
+User* BTree::getUser(int perm){
+  if(root.type == Ptr::NONE){
+    return NULL;
+  }
+  return root.getUser(perm).user;
 }
 
 AL_Head* BTree::getList(int perm) {
-	return root.getList(perm);
+  if(root.type == Ptr::NONE){
+    return NULL;
+  }
+  return root.getUser(perm).list;
 }
 
 void BTree::print() {

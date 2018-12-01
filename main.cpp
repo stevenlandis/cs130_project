@@ -121,6 +121,8 @@ int main() {
       std::cout << "Done searching...\n";
     }else if(choice == "q"){
       std::cout << "Goodbye..\n";
+    }else if(choice == "p"){
+      friendNet.print();
     }else{
       std::cout << "You entered: " + choice + " which is not an option.";
     }

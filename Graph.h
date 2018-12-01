@@ -8,15 +8,15 @@ struct AL_Head;
 struct AL_Node;
 
 struct AL_Head {
-	int perm;
-	AL_Node* head;
+	int perm = 0;
+	AL_Node* head = NULL;
 
 	~AL_Head();
 };
 
 struct AL_Node {
-	int perm;
-	AL_Node* next;
+	int perm = 0;
+	AL_Node* next = NULL;
 
 	~AL_Node();
 };
@@ -28,6 +28,7 @@ public:
 	AL_Head* addUser(int perm, std::vector<int> friends);
 	void addFriendToUser(AL_Head* user, int friendPerm);
 	bool isFriend(AL_Head* user, int friendPerm);
+	std::vector<int> listFriends(AL_Head* user);
 };
 
 #endif

@@ -36,7 +36,8 @@ struct BTree {
 		Ptr(Data* node);
 
 		Ptr insert(UserNode user);
-		AL_Head* getList(int perm);
+		UserNode getUser(int perm);
+	        
 
 		int getMin();
 		void print(int tabH);
@@ -59,7 +60,7 @@ struct BTree {
 		Ptr splitInsert(Ptr node, int i);
 		void shiftChildren(int i);
 
-		AL_Head* getList(int perm);
+		UserNode getUser(int perm);
 
 		int getMin();
 		void print(int tabH);
@@ -78,8 +79,8 @@ struct BTree {
 		Ptr splitInsert(UserNode user, int i);
 		void shiftUsers(int i);
 
-		AL_Head* getList(int perm);
-
+	  UserNode getUser(int perm);
+	
 		int getMin();
 		void print(int tabH);
 	};
@@ -89,6 +90,7 @@ struct BTree {
 	~BTree();
 
 	void insert(User* user, AL_Head* list);
+        User* getUser(int perm);
 	AL_Head* getList(int perm);
 
 	void print();
