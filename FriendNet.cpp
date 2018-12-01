@@ -84,6 +84,11 @@ void FriendNet::findUserDetails(int perm){
 }
 
 void FriendNet::recommendFriends(int perm){
+  AL_Head* list = tree.getList(perm);
+  if(list == NULL){
+    cout << "User does not exist, cannot recommend friends :(\n";
+    return;
+  }
   std::vector<int> users = graph.listFriends(tree.getList(perm));
   std::unordered_map<int,int> depths;
   depths.insert({perm, 0});
