@@ -80,8 +80,11 @@ bool Graph::isFriend(AL_Head* user, int friendPerm){
 
 
 std::vector<int> Graph::listFriends(AL_Head* user){
-  AL_Node* friendNode = user->head;
   std::vector<int> list;
+  if(user == NULL){
+    return list;
+  }
+  AL_Node* friendNode = user->head;
   while(friendNode != NULL){
     list.push_back(friendNode->perm);
     friendNode = friendNode->next;
