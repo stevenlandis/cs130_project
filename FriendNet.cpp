@@ -133,29 +133,48 @@ void FriendNet::recommendFriends(int perm){
     
 
 void FriendNet::addUser(
-            int perm_number,
-            std::string name,
-            std::string genre1,
-            std::string genre2,
-            std::vector<int> friends
+			int perm_number,
+			std::string name,
+			std::string genre1,
+			std::string genre2,
+			std::vector<int> friends
             ) {
-    // make a new user
-    User* newUser = new User(perm_number, name, genre1, genre2);
-
-    // add the user to the friend net
-    AL_Head* newHead = graph.addUser(perm_number, friends);
-
-    //add new user as a friend to its friends
+  //check if user already exists
+  User* user = tree.getUser(perm_number);
+  if(user != NULL){
+    //update name, genres
+    user->name = name;
+    user->genre1 = genre1;
+    user->genre2 = genre2;
+    //add friends
+    AL_Head* list = tree.getList(perm_number);
     for(int i = 0; i < friends.size(); i++){
+      graph.addFriendToUser(list, friends[i]);
       AL_Head* companion = tree.getList(friends[i]);
       if(companion != NULL){
 	graph.addFriendToUser(companion, perm_number);
       }
     }
-
-    
-    // tree owns and deletes newUser
-    tree.insert(newUser, newHead);
+    return;
+  }
+  
+  // make a new user
+  User* newUser = new User(perm_number, name, genre1, genre2);
+  
+  // add the user to the friend net
+  AL_Head* newHead = graph.addUser(perm_number, friends);
+  
+  //add new user as a friend to its friends
+  for(int i = 0; i < friends.size(); i++){
+    AL_Head* companion = tree.getList(friends[i]);
+    if(companion != NULL){
+      graph.addFriendToUser(companion, perm_number);
+    }
+  }
+  
+  
+  // tree owns and deletes newUser
+  tree.insert(newUser, newHead);
 }
 
 void FriendNet::print() {
