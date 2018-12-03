@@ -2,3 +2,5 @@
 exec
 exec.dSYM/*
 testExec
+mainExec
+mainExec.dSYM/*
