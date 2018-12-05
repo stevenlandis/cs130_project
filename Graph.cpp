@@ -71,7 +71,7 @@ void Graph::addFriendToUser(AL_Head* user, int friendPerm){
 bool Graph::isFriend(AL_Head* user, int friendPerm){
   AL_Node* friendNode = user->head;
   while(friendNode != NULL){
-    if(friendNode->perm = friendPerm)
+    if(friendNode->perm == friendPerm)
       return true;
     friendNode = friendNode->next;
   }
