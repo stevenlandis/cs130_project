@@ -21,4 +21,4 @@ testExec: $(HEADERS) $(CPPFILES) test.cpp
 
 clean:
 	rm -f mainExec testExec
-	rm -rf mainExec.dSYM
+	rm -rf mainExec.dSYM testExec.dSYM
