@@ -115,6 +115,7 @@ void FriendNet::recommendFriends(int perm){
 
   //start searching through users
   //skip all direct friends and self
+  bool userFound = false;
   User* user = tree.getUser(perm);
   std::string genre1 = user->genre1, genre2 = user->genre2;
   index = directFriends + 1;
@@ -126,8 +127,14 @@ void FriendNet::recommendFriends(int perm){
 	   << "\tName: " << user->name <<endl
 	   << "\tGenre1: " << user->genre1 <<endl
 	   << "\tGenre2: " << user->genre2 << endl;
+      //remember
+      userFound = true;
     }
     index++;
+  }
+
+  if(!userFound){
+    cout << "No recommendations found.\n";
   }
 }
     

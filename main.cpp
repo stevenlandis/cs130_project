@@ -63,7 +63,7 @@ int main() {
   std::string choice = "";
 
   while(choice != "q"){
-    std::cout << "Please choose one of the following operations:\n"
+    std::cout << "\nPlease choose one of the following operations:\n"
 	      << "1: Read from input file\n"
 	      << "2: Add user manually\n"
 	      << "3: Find a user\n"
